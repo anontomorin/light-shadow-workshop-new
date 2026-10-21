@@ -720,6 +720,12 @@
   line-height: 1.65;
 }
 
+/* 声明的浅粉底在夜色工坊里仍是亮色，正文若继续继承夜色主文字色（浅米色）会几乎看不清，
+   这里单独压深，保证与底色有足够对比。 */
+.workshop-screen .culture-model-note p {
+  color: #5b2a1f;
+}
+
 .culture-sources ul,
 .gallery-sources ul,
 .about-sources {

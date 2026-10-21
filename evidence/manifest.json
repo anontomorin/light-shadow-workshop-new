@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-10-15T15:45:44.986Z",
+  "generatedAt": "2026-10-21T01:21:52.779Z",
   "url": "http://localhost:5173/",
-  "browser": "Chrome/155.0.8059.40",
+  "browser": "Chrome/155.0.8059.85",
   "viewport": {
     "width": 1600,
     "height": 1000
@@ -10,107 +10,107 @@
     {
       "file": "evidence/01-首屏.png",
       "label": "标题页",
-      "bytes": 1270554
+      "bytes": 3215653
     },
     {
       "file": "evidence/01b-首屏-轮播第二扇.png",
-      "label": "标题页：花窗轮播自动切换 1 → 2（印章题名随之更换）",
-      "bytes": 1342253
+      "label": "标题页：花窗轮播自动切换 2 → 0（印章题名随之更换）",
+      "bytes": 3365337
     },
     {
       "file": "evidence/02-纹样图鉴.png",
       "label": "纹样图鉴与文化来源",
-      "bytes": 575347
+      "bytes": 871069
     },
     {
       "file": "evidence/03-花窗工坊-步步锦.png",
       "label": "步步锦模板（默认）",
-      "bytes": 697156
+      "bytes": 1827153
     },
     {
       "file": "evidence/04-空隙投影-墙面特写.png",
       "label": "墙面影子特写（窗棂空隙被保留）",
-      "bytes": 183940
+      "bytes": 205706
     },
     {
       "file": "evidence/05-花窗工坊-冰裂纹.png",
       "label": "冰裂纹模板",
-      "bytes": 711833
+      "bytes": 1844168
     },
     {
       "file": "evidence/06-花窗工坊-三交六椀.png",
       "label": "三交六椀菱花模板",
-      "bytes": 731215
+      "bytes": 1875473
     },
     {
       "file": "evidence/07-花窗工坊-回纹边饰.png",
       "label": "回纹边饰模板",
-      "bytes": 699549
+      "bytes": 1832627
     },
     {
       "file": "evidence/07b-工坊-专注画布.png",
       "label": "收起两侧栏：三维操作区铺满整行（操作区优先）",
-      "bytes": 491470
+      "bytes": 718985
     },
     {
       "file": "evidence/08-引导实验面板.png",
       "label": "引导实验：对照读数由实时投影指标推导（含真实变化百分比）",
-      "bytes": 781373
+      "bytes": 1732398
     },
     {
       "file": "evidence/08b-工坊-绘制模式.png",
       "label": "绘制模式：3 个节点带序号、当前节点有光晕与准星，虚线橡皮筋 + 按 barWidth 换算的真实棂条预览",
-      "bytes": 585082
+      "bytes": 1580567
     },
     {
       "file": "evidence/08c-绘制-节点标识特写.png",
       "label": "2× 特写：起点（碧玉）/ 中间节点 / 当前节点（光晕 + 十字准星 + 序号）/ 光标落点坐标",
-      "bytes": 111946
+      "bytes": 127351
     },
     {
       "file": "evidence/09-自绘窗棂.png",
       "label": "自绘棂条已并入投影",
-      "bytes": 735913
+      "bytes": 1725663
     },
     {
       "file": "evidence/10-导出海报.png",
       "label": "导出海报 1920×1080（含设计图 / 投影 / 读数）",
-      "bytes": 393166
+      "bytes": 395342
     },
     {
       "file": "evidence/11-二级入口-光影挑战.png",
       "label": "二级入口：影形解谜与自由实验室收在这里",
-      "bytes": 270704
+      "bytes": 2754999
     },
     {
       "file": "evidence/12-影形解谜-关卡列表.png",
       "label": "影形解谜关卡列表：几何初阶 / 花窗影谜 两组，共 10 关",
-      "bytes": 360915
+      "bytes": 2566210
     },
     {
       "file": "evidence/13-影形解谜-第1关.png",
       "label": "旧关卡链路：第 1 关（真实投影 + IoU 判定）",
-      "bytes": 245742
+      "bytes": 1134303
     },
     {
       "file": "evidence/14-花窗题目-第10关.png",
       "label": "第 10 关「窗棂总成 · 圆光窗」：窗格之间的空隙同样是判定的一部分",
-      "bytes": 412285
+      "bytes": 1209951
     },
     {
       "file": "evidence/15-花窗题目-第8关.png",
       "label": "第 8 关「菱花窗 · 三交六椀」：用几何构件拼出经典花窗的影子",
-      "bytes": 419848
+      "bytes": 1211993
     },
     {
       "file": "evidence/16-自由实验室.png",
       "label": "自由实验室：13 种形状、最多 10 个物体（原有玩法保持可用）",
-      "bytes": 242013
+      "bytes": 809299
     },
     {
       "file": "evidence/17-自由实验室-镂空凹形.png",
       "label": "十字 / 五角星 / 圆环：中空同样被如实投影",
-      "bytes": 269680
+      "bytes": 824136
     }
   ]
 }
