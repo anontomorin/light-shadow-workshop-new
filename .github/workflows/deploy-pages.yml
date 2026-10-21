@@ -39,9 +39,8 @@ jobs:
 
       - name: 配置 Pages
         uses: actions/configure-pages@v5
-        with:
-          # 首次运行时自动为新仓库创建 Pages 站点，免去手动到 Settings 里开启
-          enablement: true
+        # 不在工作流里自动创建 Pages 站点：GITHUB_TOKEN 没有该权限，
+        # 站点需在仓库 Settings → Pages 里一次性启用（Source: GitHub Actions）
 
       - name: 上传构建产物
         uses: actions/upload-pages-artifact@v3
