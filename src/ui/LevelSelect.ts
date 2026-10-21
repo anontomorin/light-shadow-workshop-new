@@ -83,7 +83,7 @@ export class LevelSelect {
         ])
       : h('div', { class: 'lv-foot' }, [h('span', { class: 'badge', text: '🔒 通关前一关解锁' })]);
 
-    return h(
+    const card = h(
       'button',
       {
         class: `level-card${unlocked ? '' : ' locked'}${isLattice ? ' lattice' : ''}`,
@@ -103,6 +103,9 @@ export class LevelSelect {
         foot,
       ],
     );
+    // 入场错峰：花窗组从 0 重新计时，两排卡片各自成浪
+    card.style.setProperty('--i', String(isLattice ? level.id - LATTICE_FROM : level.id - 1));
+    return card;
   }
 
   /** 根据存档刷新卡片状态 */

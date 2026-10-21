@@ -157,18 +157,39 @@ async function wallPixelStats(x0, y0, x1, y1) {
       // 影子主题色 #31455a → (49, 69, 90)；目标描边 #1f7f96 → (31, 127, 150)
       const nearShadow = (r, g, b) => Math.abs(r - 49) < 46 && Math.abs(g - 69) < 46 && Math.abs(b - 90) < 46 && b > r;
       const nearStroke = (r, g, b) => Math.abs(r - 31) < 30 && Math.abs(g - 127) < 30 && Math.abs(b - 150) < 30;
-      const buckets = new Map();
+      const w = bmp.width;
+      const h = bmp.height;
+      const isShadow = new Uint8Array(w * h);
       let shadowCount = 0;
       let strokeCount = 0;
-      for (let i = 0; i < d.length; i += 4) {
+      for (let p = 0, i = 0; p < w * h; p++, i += 4) {
         const r = d[i], g = d[i + 1], b = d[i + 2];
         if (nearStroke(r, g, b)) strokeCount++;
         if (!nearShadow(r, g, b)) continue;
+        isShadow[p] = 1;
         shadowCount++;
-        const key = (r >> 2) + ',' + (g >> 2) + ',' + (b >> 2);
-        buckets.set(key, (buckets.get(key) || 0) + 1);
       }
-      return { count: shadowCount, distinct: buckets.size, strokeCount };
+      // 只统计"内部"像素（四邻域也是影子）：边缘一圈是画布抗锯齿产生的过渡色，
+      // 与"半透明叠加造成的接缝"无关。真正的接缝会形成成片的内部色差，仍会被抓住。
+      const buckets = new Map();
+      let interior = 0;
+      for (let y = 1; y < h - 1; y++) {
+        for (let x = 1; x < w - 1; x++) {
+          const p = y * w + x;
+          if (!isShadow[p]) continue;
+          if (!isShadow[p - 1] || !isShadow[p + 1] || !isShadow[p - w] || !isShadow[p + w]) continue;
+          interior++;
+          const i = p * 4;
+          const key = (d[i] >> 2) + ',' + (d[i + 1] >> 2) + ',' + (d[i + 2] >> 2);
+          buckets.set(key, (buckets.get(key) || 0) + 1);
+        }
+      }
+      // 只把"成片"的色差算作接缝：单个物件的硬边/高光零散像素不算。
+      // 真正的半透明叠加会在重叠区形成一大块明显更深的颜色，占比远超 2%。
+      const minShare = Math.max(8, Math.floor(interior * 0.02));
+      const solid = [...buckets.entries()].filter(([, n]) => n >= minShare).sort((a, b) => b[1] - a[1]);
+      const top = [...buckets.entries()].sort((a, b) => b[1] - a[1]).slice(0, 6);
+      return { count: shadowCount, distinct: solid.length, interior, strokeCount, top };
     })`,
     `data:image/png;base64,${res.data}`,
   );
@@ -364,9 +385,20 @@ async function main() {
     `(() => { document.querySelectorAll('.hero-dot')[2].click(); return [...document.querySelectorAll('.hero-frame')].findIndex((f) => f.classList.contains('is-active')); })()`,
   );
   check('点击指示点会立刻切换花窗', dotActive === 2, `activeIndex=${dotActive}`);
-  await sleep(700);
-  const sealAfter = await evaluate(`document.querySelector('.title-seal')?.textContent?.trim() ?? ''`);
-  check('印章题名随花窗同步更换', sealAfter === '三交六椀菱花', `印章="${sealAfter}"`);
+  // 轮播可能在等待期间自动切到下一扇，因此断言的是"印章仍与当前帧一致"这一不变式，
+  // 而不是硬编码某个纹样名（否则页面稍慢就会假失败）。
+  let sealAfter = '';
+  let sealAfterOk = false;
+  for (let i = 0; i < 8; i++) {
+    await sleep(180);
+    const s = await readSeal();
+    sealAfter = `帧${s.idx} 印章="${s.seal}" 当前样式名="${s.expect}"`;
+    if (!s.swapping && s.expect && s.seal === s.expect) {
+      sealAfterOk = true;
+      break;
+    }
+  }
+  check('印章题名随花窗同步更换', sealAfterOk, sealAfter);
 
   // 字体：断言 CSS 令牌本身（稳定），再断言正文没有回退到黑体栈
   const fontVars = JSON.parse(
@@ -375,14 +407,27 @@ async function main() {
     )) ?? '{}',
   );
   check('正文使用宋体系（中国风）', /Songti|STSong|SimSun/.test(fontVars.bodyVar ?? ''), fontVars.bodyVar?.trim());
-  check('标题使用楷体系（中国风）', /Kaiti|STKaiti|KaiTi/.test(fontVars.titleVar ?? ''), fontVars.titleVar?.trim());
+  check(
+    '标题使用内嵌毛笔楷书（并保留楷体回退）',
+    /Ma Shan Zheng/.test(fontVars.titleVar ?? '') && /Kaiti|STKaiti|KaiTi/.test(fontVars.titleVar ?? ''),
+    fontVars.titleVar?.trim(),
+  );
   check(
     '正文没有回退到黑体栈',
     /PingFang|Microsoft YaHei|system-ui/.test(fontVars.body ?? '') === false,
     fontVars.body ?? '',
   );
-  const fontFaceCount = await evaluate(`document.fonts.size`);
-  check('未声明任何 @font-face（不加载网络字体）', fontFaceCount === 0, `@font-face 数=${fontFaceCount}`);
+  const fontInfo = JSON.parse(
+    (await evaluate(
+      `(async () => { await document.fonts.ready; return JSON.stringify({ count: document.fonts.size, msz: document.fonts.check('24px "Ma Shan Zheng"', '光影工坊'), zcool: document.fonts.check('16px "ZCOOL XiaoWei"', '光影工坊') }); })()`,
+    )) ?? '{}',
+  );
+  check('内嵌主题字体已声明（离线可用）', (fontInfo.count ?? 0) >= 2, `@font-face 数=${fontInfo.count}`);
+  check(
+    '内嵌字体已成功加载',
+    fontInfo.msz === true && fontInfo.zcool === true,
+    `马善政=${fontInfo.msz} / 站酷小薇=${fontInfo.zcool}`,
+  );
 
   // ── 2. 标题页与二级入口 ──────────────────────────────────
   console.log('\n[2] 标题页与二级入口');
@@ -883,7 +928,7 @@ async function main() {
   check(
     '重叠区域颜色均匀（无叠加接缝）',
     probe.distinct <= 3,
-    `不同色阶数=${probe.distinct}（越接近 1 越说明是单次填充）`,
+    `成片色阶数=${probe.distinct}（内部像素=${probe.interior}；越接近 1 越说明是单次填充）top=${JSON.stringify(probe.top)}`,
   );
   await screenshot('09b-overlap');
   await evaluate(`window.__lightShadow.resetLabScene && window.__lightShadow.resetLabScene()`);

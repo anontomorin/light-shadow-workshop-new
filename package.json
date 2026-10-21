@@ -2,7 +2,7 @@
   "name": "light-shadow-workshop",
   "private": true,
   "version": "1.0.0",
-  "description": "光影工坊：影子设计师 —— 三维空间投影益智游戏",
+  "description": "光影工坊：窗棂之间 —— 三维空间投影益智游戏",
   "type": "module",
   "scripts": {
     "dev": "vite",

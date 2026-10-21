@@ -88,6 +88,7 @@ export class GameHUD {
         text: '←',
         onclick: handlers.onBack,
       }),
+      h('div', { class: 'topbar-seal', text: '影', 'aria-hidden': 'true' }),
       h('div', { class: 'topbar-info' }, [this.noEl, this.titleEl]),
       h('div', { class: 'topbar-spacer' }),
       h('button', {
@@ -103,6 +104,14 @@ export class GameHUD {
     this.stageEl = h('div', { class: 'stage' });
     const stageWrap = h('div', { class: 'stage-wrap' }, [
       this.stageEl,
+      h('div', { class: 'stage-vignette', 'aria-hidden': 'true' }),
+      h('div', { class: 'stage-frame', 'aria-hidden': 'true' }, [
+        h('i', { class: 'sf-corner tl' }),
+        h('i', { class: 'sf-corner tr' }),
+        h('i', { class: 'sf-corner bl' }),
+        h('i', { class: 'sf-corner br' }),
+      ]),
+      h('div', { class: 'stage-burst-layer', 'aria-hidden': 'true' }),
       topbar,
       this.tutorialEl,
     ]);
@@ -164,6 +173,11 @@ export class GameHUD {
     });
 
     const sidePanel = h('aside', { class: 'side-panel' }, [
+      h('div', { class: 'panel-ornament', 'aria-hidden': 'true' }, [
+        h('span', { class: 'panel-ornament-rule' }),
+        h('span', { class: 'panel-ornament-cn', text: '观 影' }),
+        h('span', { class: 'panel-ornament-rule' }),
+      ]),
       h('div', { class: 'side-section' }, [h('h3', { text: '场景物体' }), this.chipsEl]),
       this.objectPanel,
       h('div', { class: 'side-section' }, [h('h3', { text: '观看视角' }), this.viewPanel.root]),
@@ -409,8 +423,7 @@ export class GameHUD {
     this.matchFill.style.width = `${pct * 100}%`;
     this.matchReadout.textContent = `${Math.round(pct * 100)}%`;
     if (this.level) {
-      this.matchReadout.style.color =
-        iou >= this.level.matchThreshold ? 'var(--success)' : 'var(--ink)';
+      this.matchReadout.classList.toggle('is-hit', iou >= this.level.matchThreshold);
     }
   }
 
@@ -420,6 +433,31 @@ export class GameHUD {
 
   setCleared(cleared: boolean): void {
     this.nextBtn.disabled = !cleared;
+  }
+
+  /** 通关演出：金色光环与火星从舞台中心炸开（纯装饰，不影响判定） */
+  playClearBurst(): void {
+    const layer = this.modalHost.querySelector('.stage-burst-layer');
+    if (!layer) return;
+    layer.replaceChildren();
+    this.modalHost.classList.add('is-cleared');
+    for (let i = 0; i < 3; i++) {
+      const ring = h('i', { class: 'burst-ring' });
+      ring.style.setProperty('--ring-delay', `${i * 160}ms`);
+      ring.style.setProperty('--ring-size', `${150 + i * 90}px`);
+      layer.append(ring);
+    }
+    for (let i = 0; i < 26; i++) {
+      const spark = h('i', { class: 'burst-spark' });
+      spark.style.setProperty('--a', `${(360 / 26) * i + (i % 5) * 4}deg`);
+      spark.style.setProperty('--d', `${90 + (i % 7) * 26}px`);
+      spark.style.setProperty('--spark-delay', `${(i % 6) * 40}ms`);
+      layer.append(spark);
+    }
+    window.setTimeout(() => {
+      layer.replaceChildren();
+      this.modalHost.classList.remove('is-cleared');
+    }, 1900);
   }
 
   setHint(text: string | null): void {

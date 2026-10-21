@@ -42,6 +42,19 @@
   --paper: #f5eee0;
   --paper-deep: #e8dcc4;
 
+  /* 夜色工坊：舞台与游戏界面的深色体系（墨、漆、青铜、鎏金） */
+  --night: #0d161c;
+  --night-2: #131f26;
+  --night-3: #1a2a32;
+  --lacquer: #101b21;
+  --lacquer-2: #17262e;
+  --night-line: rgba(206, 170, 92, 0.26);
+  --night-line-strong: rgba(226, 190, 110, 0.55);
+  --night-ink: #efe4cc;
+  --night-ink-soft: #bcae92;
+  --night-ink-faint: #8b816f;
+  --gold-bright: #e8cd86;
+
   /* 线框与阴影 */
   --line: #ddd0b6;
   --line-strong: #c6b492;
@@ -53,13 +66,16 @@
   --radius: 10px;
   --radius-lg: 16px;
 
-  /* 正文与界面：宋体系（书卷气）。
-     全部是系统本地字体族，不 @import、不打包字体文件，保持零外部资源依赖与离线可用。 */
+  /* 正文：宋体系（书卷气）。
+     字体文件已内嵌在 src/fonts（按界面用字裁剪），因此不依赖网络，
+     仅当缺字时回退到系统宋体。 */
   --font: 'Songti SC', 'STSong', 'Noto Serif SC', 'Source Han Serif SC', 'SimSun', serif;
-  /* 标题：楷体系（手写感），中国传统题签的常见取法 */
-  --font-title: 'Kaiti SC', 'STKaiti', 'KaiTi', 'TW-Kai', 'Songti SC', 'STSong', 'SimSun', serif;
-  /* 题签 / 引文：与标题同源，保留独立变量以便日后单独微调 */
-  --font-kai: 'Kaiti SC', 'STKaiti', 'KaiTi', 'TW-Kai', 'Songti SC', 'STSong', 'SimSun', serif;
+  /* 标题：马善政毛笔楷书（内嵌）。落笔有明显的提按与飞白，适合大字号题字 */
+  --font-title: 'Ma Shan Zheng', 'Kaiti SC', 'STKaiti', 'KaiTi', 'TW-Kai', 'Songti SC', 'STSong', 'SimSun', serif;
+  /* 题签 / 引文：站酷小薇（内嵌），瘦金气质的标题与标签 */
+  --font-kai: 'ZCOOL XiaoWei', 'Kaiti SC', 'STKaiti', 'KaiTi', 'TW-Kai', 'Songti SC', 'STSong', 'SimSun', serif;
+  /* 界面标题 / 按钮 / 读数：站酷小薇，作为毛笔题字与正文之间的第三层 */
+  --font-display: 'ZCOOL XiaoWei', 'Kaiti SC', 'STKaiti', 'KaiTi', 'TW-Kai', 'Songti SC', 'STSong', 'SimSun', serif;
 
   /* ---------- 字号梯度（唯一真源） ----------
      正文改为宋体后，笔画比黑体细，小字号明显更"累眼"：
@@ -340,6 +356,234 @@ button {
   50% {
     transform: translateX(14px);
   }
+}
+
+/* 风景底图的缓慢推拉，像镜头在画卷上移动 */
+@keyframes photo-drift {
+  0% {
+    transform: scale(1.08) translate3d(-1.2%, 0.6%, 0);
+  }
+  50% {
+    transform: scale(1.12) translate3d(0.8%, -0.8%, 0);
+  }
+  100% {
+    transform: scale(1.08) translate3d(1.2%, 0.4%, 0);
+  }
+}
+
+/* ============================================================
+   夜色舞台的动效语汇：墨雾、流萤、鎏金、题字落笔
+   ============================================================ */
+
+/* 题字逐字落笔：从纸后浮出，伴随极轻的横向擦笔 */
+@keyframes title-char-in {
+  0% {
+    opacity: 0;
+    transform: translateY(18px) scale(0.94) rotate(-1.5deg);
+    filter: blur(12px);
+  }
+  55% {
+    opacity: 1;
+    filter: blur(0);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+    filter: blur(0);
+  }
+}
+
+/* 墨色渐显：用于标题页大块内容 */
+@keyframes ink-reveal {
+  0% {
+    opacity: 0;
+    filter: blur(14px);
+    transform: translateY(16px);
+  }
+  100% {
+    opacity: 1;
+    filter: blur(0);
+    transform: none;
+  }
+}
+
+/* 鎏金流光：背景 position 在渐变带上滑过 */
+@keyframes gold-sheen {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 200% 50%;
+  }
+}
+
+/* 缓慢呼吸的光晕 */
+@keyframes glow-breathe {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.95;
+    transform: scale(1.06);
+  }
+}
+
+/* 雾带横向漂移 */
+@keyframes mist-drift {
+  0% {
+    transform: translate3d(-6%, 0, 0) scale(1.02);
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 0.6;
+  }
+  100% {
+    transform: translate3d(6%, 0, 0) scale(1.02);
+    opacity: 0.35;
+  }
+}
+
+/* 流萤：向上升腾、左右轻摆、尾端熄灭 */
+@keyframes mote-rise {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 18px, 0) scale(0.6);
+  }
+  18% {
+    opacity: var(--mote-op, 0.8);
+  }
+  80% {
+    opacity: calc(var(--mote-op, 0.8) * 0.6);
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(var(--mote-sway, 24px), -90px, 0) scale(1);
+  }
+}
+
+/* 落英：旋转飘落 */
+@keyframes petal-fall {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, -8vh, 0) rotate(0deg);
+  }
+  12% {
+    opacity: 0.85;
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(var(--petal-sway, 90px), 108vh, 0) rotate(560deg);
+  }
+}
+
+/* 印章落地：略微回弹 */
+@keyframes seal-stamp {
+  0% {
+    opacity: 0;
+    transform: rotate(-5deg) scale(1.35);
+    filter: blur(3px);
+  }
+  60% {
+    opacity: 1;
+    transform: rotate(-5deg) scale(0.96);
+  }
+  100% {
+    opacity: 1;
+    transform: rotate(-5deg) scale(1);
+    filter: blur(0);
+  }
+}
+
+/* 侧栏从右侧滑入 */
+@keyframes panel-in {
+  from {
+    opacity: 0;
+    transform: translateX(28px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* 顶栏自上落下 */
+@keyframes drop-in {
+  from {
+    opacity: 0;
+    transform: translateY(-22px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* 底部操作坞自下浮起 */
+@keyframes dock-in {
+  from {
+    opacity: 0;
+    transform: translateY(32px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* 进度条上的流光 */
+@keyframes bar-sheen {
+  0% {
+    transform: translateX(-120%);
+  }
+  60%,
+  100% {
+    transform: translateX(320%);
+  }
+}
+
+/* 通关：扩散的光环 */
+@keyframes ring-burst {
+  0% {
+    opacity: 0.9;
+    transform: scale(0.35);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(2.4);
+  }
+}
+
+/* 极慢旋转（可用于窗棂纹样与光晕底座） */
+@keyframes slow-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* 卡片错峰入场 */
+@keyframes card-rise {
+  from {
+    opacity: 0;
+    transform: translateY(26px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* 通用：可点击卡片的鎏金边光 */
+.gold-hover {
+  transition: border-color var(--dur) var(--ease), box-shadow var(--dur) var(--ease),
+    transform var(--dur) var(--ease);
+}
+
+.gold-hover:hover {
+  border-color: var(--night-line-strong);
+  box-shadow: 0 0 0 1px rgba(232, 205, 134, 0.18), 0 18px 48px rgba(0, 0, 0, 0.42),
+    0 0 34px rgba(201, 162, 39, 0.18);
 }
 
 @media (prefers-reduced-motion: reduce) {

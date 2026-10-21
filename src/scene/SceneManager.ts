@@ -113,6 +113,14 @@ export class SceneManager {
     this.setupViewControls();
   }
 
+  /** 切换场景底色（游戏 / 实验室用深夜色，工坊保留亮色纸面） */
+  setBackdrop(color: string): void {
+    if (this.disposed) return;
+    const c = new THREE.Color(color);
+    this.scene.background = c;
+    if (this.scene.fog instanceof THREE.Fog) this.scene.fog.color.copy(c);
+  }
+
   // ───────────────────────── 相机与视角 ─────────────────────────
 
   private applyCameraTransform(): void {

@@ -47,6 +47,7 @@ export class ResultModal {
     ]);
 
     const modal = h('div', { class: 'modal', role: 'dialog', 'aria-modal': 'true' }, [
+      h('div', { class: 'result-seal', text: '通关', 'aria-hidden': 'true' }),
       h('div', { class: 'badge badge-success', text: '通关' }),
       h('h2', { style: { marginTop: '10px' }, text: `第 ${data.levelId} 关 · ${data.levelTitle}` }),
       h('div', { class: 'modal-sub', text: RANK_TIP[data.rank] }),

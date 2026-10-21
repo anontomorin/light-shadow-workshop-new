@@ -1,3 +1,4 @@
+import './styles/fonts.css';
 import './styles/global.css';
 import './styles/screens.css';
 import './styles/components.css';
@@ -29,7 +30,7 @@ function boot(): void {
   if (!isWebGLAvailable()) {
     showFatal(
       '无法启动三维场景',
-      '《光影工坊：影子设计师》需要 WebGL 支持。请使用较新版本的 Chrome、Edge、Firefox 或 Safari，并确认浏览器已启用硬件加速。',
+      '《光影工坊：窗棂之间》需要 WebGL 支持。请使用较新版本的 Chrome、Edge、Firefox 或 Safari，并确认浏览器已启用硬件加速。',
     );
     return;
   }

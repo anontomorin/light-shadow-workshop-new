@@ -94,6 +94,49 @@ const HERO_SLIDES: HeroSlide[] = [
   },
 ];
 
+/** 确定性伪随机：装饰粒子的位置每次打开都一样，不会闪烁重排 */
+function seeded(seed: number): () => number {
+  let s = seed >>> 0;
+  return () => {
+    s = (s * 1664525 + 1013904223) >>> 0;
+    return s / 4294967296;
+  };
+}
+
+/** 流萤：金色微光从画面下缘缓缓升起 */
+function moteField(): HTMLElement {
+  const rand = seeded(20261021);
+  const field = h('div', { class: 'mote-field', 'aria-hidden': 'true' });
+  for (let i = 0; i < 28; i++) {
+    const mote = h('i', { class: 'mote' });
+    mote.style.setProperty('--x', `${rand() * 100}%`);
+    mote.style.setProperty('--y', `${45 + rand() * 55}%`);
+    mote.style.setProperty('--size', `${1.5 + rand() * 3.4}px`);
+    mote.style.setProperty('--delay', `${rand() * 14}s`);
+    mote.style.setProperty('--dur', `${9 + rand() * 11}s`);
+    mote.style.setProperty('--mote-op', `${0.35 + rand() * 0.5}`);
+    mote.style.setProperty('--mote-sway', `${-60 + rand() * 120}px`);
+    field.append(mote);
+  }
+  return field;
+}
+
+/** 落英：极淡的纸色花瓣，只在右侧留白处飘过 */
+function petalField(): HTMLElement {
+  const rand = seeded(19870);
+  const field = h('div', { class: 'petal-field', 'aria-hidden': 'true' });
+  for (let i = 0; i < 14; i++) {
+    const petal = h('i', { class: 'petal' });
+    petal.style.setProperty('--x', `${18 + rand() * 78}%`);
+    petal.style.setProperty('--delay', `${rand() * 18}s`);
+    petal.style.setProperty('--dur', `${16 + rand() * 12}s`);
+    petal.style.setProperty('--petal-sway', `${-80 + rand() * 200}px`);
+    petal.style.setProperty('--petal-size', `${5 + rand() * 6}px`);
+    field.append(petal);
+  }
+  return field;
+}
+
 export class TitleScreen {
   readonly root: HTMLElement;
 
@@ -117,11 +160,15 @@ export class TitleScreen {
         width: HERO_SIZE.w,
         height: HERO_SIZE.h,
         ink: BAR_INK,
-        background: 'none',
+        // 纸底直接画在 SVG 里，与窗格共用同一套坐标 / 同一个 3D 变换，
+        // 窗框与它后面的"白纸"因此严丝合缝，不会再错位出一圈白边。
+        background: '#fbf1dc',
       });
       windowSvg.classList.add('hero-svg');
-      // 影子 = 同一份窗格换墨色，所以"影子就是这扇窗投出来的"在数据上成立
+      // 影子 = 同一份窗格换墨色，所以"影子就是这扇窗投出来的"在数据上成立。
+      // 影子只要棂条，不要那张纸。
       const shadowSvg = windowSvg.cloneNode(true) as SVGSVGElement;
+      shadowSvg.querySelector('rect')?.remove();
       shadowSvg.querySelectorAll('polygon').forEach((poly) => poly.setAttribute('fill', SHADOW_INK));
 
       const frame = h(
@@ -136,7 +183,6 @@ export class TitleScreen {
     });
 
     const hero = h('div', { class: 'title-hero' }, [
-      h('div', { class: 'hero-paper' }),
       ...this.frames,
       h(
         'div',
@@ -173,7 +219,15 @@ export class TitleScreen {
         h('span', { class: 'mark-rule' }),
         h('span', { text: '中国传统建筑窗棂 · 光影创作' }),
       ]),
-      h('h1', { class: 'title-main', text: '光影工坊' }),
+      h(
+        'h1',
+        { class: 'title-main', 'aria-label': '光影工坊' },
+        [...'光影工坊'].map((ch, i) => {
+          const span = h('span', { class: 'title-char', text: ch, 'aria-hidden': 'true' });
+          span.style.setProperty('--i', String(i));
+          return span;
+        }),
+      ),
       h('div', { class: 'title-sub', text: '窗 棂 之 間' }),
       this.sealEl,
       h('p', {
@@ -210,10 +264,16 @@ export class TitleScreen {
 
     this.root = h('section', { class: 'screen title-screen' }, [
       h('div', { class: 'title-decor' }, [
+        h('div', { class: 'title-photo', 'aria-hidden': 'true' }),
         h('div', { class: 'title-moon' }),
         h('div', { class: 'title-lattice-bg' }),
+        h('div', { class: 'title-mist title-mist-1' }),
+        h('div', { class: 'title-mist title-mist-2' }),
+        h('div', { class: 'title-mist title-mist-3' }),
         h('div', { class: 'title-ridge' }),
         h('div', { class: 'title-ridge title-ridge-2' }),
+        moteField(),
+        petalField(),
       ]),
       content,
       hero,

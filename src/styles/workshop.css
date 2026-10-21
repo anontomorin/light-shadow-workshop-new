@@ -1,6 +1,7 @@
 /* ============================================================
    花窗工坊 · 视觉与布局
-   风格：明亮、克制的东方几何；宣纸底 + 木色/碧玉主色 + 少量朱砂点缀。
+   风格：与「光影挑战」一致的夜色工坊——暗漆机身、鎏金细线、朱砂印记；
+   三维舞台保留明亮的窗面，暗色只做画框（见文件末尾「夜色花窗工坊」段）。
    本文件只处理工坊界面（WindowEditorHUD）、纹样图鉴与作品集的版面，
    不改动标题页 / 二级入口 / 关卡页 / 游戏页 / 实验室的样式
    （那些都在 screens.css 与 components.css 里）。
@@ -1033,4 +1034,408 @@
     font-size: var(--fs-note);
     bottom: 10px;
   }
+}
+
+/* ============================================================
+   二〇二六 · 夜色花窗工坊
+   与「光影挑战」入口页同一套语言：暗漆机身、鎏金细线、朱砂印记。
+   只有三维舞台保持明亮——影子仍是这幅画里唯一的光源。
+   ============================================================ */
+
+/* 局部色板：把纸色变量整体换成漆色，
+   面板、指引卡、状态条、输入框、模板卡等由 var 驱动的部分会自动变暗，
+   下面只针对硬编码的亮色与需要金色点缀的地方逐条覆盖。 */
+.workshop-screen {
+  --bg: #081014;
+  --bg-deep: #050a0d;
+  --surface: #101c22;
+  --surface-2: #0d181d;
+  --surface-3: #16262e;
+  --ink: #eee3c9;
+  --ink-soft: rgba(226, 214, 188, 0.74);
+  --ink-faint: rgba(214, 200, 172, 0.5);
+  --line: rgba(206, 170, 92, 0.2);
+  --line-strong: rgba(226, 190, 110, 0.38);
+  --wood: #b98a52;
+  --wood-soft: rgba(201, 162, 39, 0.16);
+  --wood-light: #c9a227;
+  --jade: #7fbfa2;
+  --primary: #d3b26a;
+
+  color: var(--night-ink);
+  background:
+    radial-gradient(120% 90% at 16% 0%, #17262e 0%, transparent 58%),
+    radial-gradient(90% 76% at 100% 100%, #1b2c2c 0%, transparent 62%),
+    linear-gradient(160deg, #0b1419 0%, #0e1a20 46%, #091115 100%);
+}
+
+/* ---------------- 顶部栏 ---------------- */
+.workshop-screen > .game-topbar {
+  border: 1px solid rgba(232, 205, 134, 0.22);
+  border-radius: 5px;
+  background:
+    linear-gradient(158deg, rgba(24, 40, 48, 0.9), rgba(8, 16, 21, 0.94));
+  box-shadow:
+    0 14px 34px rgba(0, 0, 0, 0.42),
+    inset 0 1px 0 rgba(255, 236, 196, 0.08);
+  backdrop-filter: blur(10px) saturate(120%);
+}
+
+.workshop-screen .topbar-info {
+  padding: 3px 12px;
+  border: 1px solid rgba(232, 205, 134, 0.2);
+  border-left: 3px solid var(--cinnabar);
+  border-radius: 4px;
+  background: linear-gradient(160deg, rgba(20, 35, 42, 0.78), rgba(8, 16, 21, 0.88));
+  box-shadow: inset 0 1px 0 rgba(255, 236, 196, 0.06);
+  backdrop-filter: blur(10px) saturate(120%);
+}
+
+.workshop-screen .topbar-info .lv {
+  color: rgba(232, 205, 134, 0.62);
+  letter-spacing: 0.26em;
+}
+
+.workshop-screen .topbar-info .name {
+  font-family: var(--font-display);
+  font-weight: 400;
+  color: #f7ecd4;
+  letter-spacing: 0.1em;
+  text-shadow: 0 0 18px rgba(232, 205, 134, 0.28);
+}
+
+.workshop-screen .save-state {
+  color: rgba(214, 205, 188, 0.55);
+}
+
+/* ---------------- 底部操作坞 ---------------- */
+.workshop-screen > .game-dock {
+  position: relative;
+  border: 1px solid rgba(232, 205, 134, 0.2);
+  border-top: 2px solid rgba(240, 205, 145, 0.55);
+  border-radius: var(--radius);
+  background: linear-gradient(180deg, rgba(21, 35, 42, 0.96), rgba(8, 15, 19, 0.98));
+  box-shadow:
+    0 -16px 40px rgba(0, 0, 0, 0.36),
+    inset 0 1px 0 rgba(255, 236, 196, 0.08);
+}
+
+/* ---------------- 两侧漆板 ---------------- */
+.workshop-screen .workshop-panel {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(232, 205, 134, 0.3) transparent;
+}
+
+.workshop-screen .workshop-panel::-webkit-scrollbar {
+  width: 9px;
+}
+
+.workshop-screen .workshop-panel::-webkit-scrollbar-thumb {
+  border-radius: 9px;
+  background: rgba(232, 205, 134, 0.26);
+}
+
+.workshop-screen .workshop-panel .side-section {
+  border: 1px solid rgba(232, 205, 134, 0.16);
+  border-radius: 5px;
+  background-color: var(--lacquer);
+  background-image:
+    linear-gradient(158deg, rgba(28, 44, 52, 0.8), rgba(10, 19, 24, 0.94)),
+    radial-gradient(120% 40% at 50% 0%, rgba(232, 205, 134, 0.1), transparent 62%),
+    url('../assets/tex-panel.jpg');
+  background-size: cover;
+  background-position: center top;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 236, 196, 0.06),
+    0 10px 26px rgba(0, 0, 0, 0.24);
+}
+
+.workshop-screen .side-section h3 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  letter-spacing: 0.18em;
+  color: rgba(240, 214, 158, 0.86);
+}
+
+.workshop-screen .side-section h3::before {
+  height: 13px;
+  background: linear-gradient(180deg, var(--cinnabar), var(--gold));
+  box-shadow: 0 0 10px rgba(201, 162, 39, 0.45);
+}
+
+/* ---------------- 舞台：暗房里的一扇亮窗 ---------------- */
+
+/* 画布本身仍是宣纸色（GameApp 给的 #f6efe3），这里只换外框：
+   金色细线 + 更重的落影，让亮窗从漆墙上"浮"起来。 */
+.workshop-screen .stage-wrap,
+.workshop-body > .stage-wrap {
+  border: 1px solid rgba(232, 205, 134, 0.42);
+  background: #f6efe3;
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.55),
+    0 30px 70px rgba(0, 0, 0, 0.58),
+    0 0 70px rgba(232, 205, 134, 0.12);
+}
+
+.workshop-screen .stage-wrap::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+  border: 1px solid rgba(232, 205, 134, 0.16);
+  box-shadow: inset 0 0 42px rgba(5, 10, 14, 0.14);
+}
+
+.workshop-screen .guide-card {
+  border: 1px solid rgba(232, 205, 134, 0.2);
+  border-left: 3px solid var(--gold);
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  box-shadow:
+    0 18px 40px rgba(0, 0, 0, 0.44),
+    inset 0 1px 0 rgba(255, 236, 196, 0.07);
+}
+
+.workshop-screen .guide-head {
+  border-bottom-color: rgba(232, 205, 134, 0.16);
+}
+
+.workshop-screen .guide-title {
+  color: rgba(240, 214, 158, 0.9);
+}
+
+/* 内容超出时的底部渐隐：跟着漆色走，不能再用纸色 */
+.workshop-screen .guide-card.is-scrollable::after {
+  background: linear-gradient(180deg, rgba(16, 28, 34, 0), rgba(16, 28, 34, 0.96));
+}
+
+.workshop-screen .guide-draw-chip {
+  color: rgba(214, 205, 188, 0.62);
+}
+
+.workshop-screen .guide-step {
+  color: rgba(232, 224, 204, 0.86);
+}
+
+.workshop-screen .guide-step-no {
+  border-color: rgba(214, 122, 94, 0.7);
+  color: #d97a5e;
+}
+
+.workshop-screen .guide-group-title {
+  color: rgba(240, 214, 158, 0.8);
+}
+
+.workshop-screen .guide-desc {
+  color: rgba(226, 216, 194, 0.6);
+}
+
+.workshop-screen .stage-status {
+  color: rgba(226, 216, 194, 0.66);
+  background: color-mix(in srgb, var(--surface) 88%, transparent);
+  border-top: 1px solid rgba(232, 205, 134, 0.18);
+}
+
+.workshop-screen .stage-status.is-drawing {
+  color: #d97a5e;
+  border-top-color: rgba(214, 122, 94, 0.7);
+}
+
+/* 绘制浮层落在暗漆影壁上：读数改成浅金 + 深底描边，
+   不再沿用亮色版面的"墨字 + 纸色描边"（那会变成深色压深色）。 */
+.workshop-screen .draw-hover-label,
+.workshop-screen .draw-node-index {
+  fill: #f3e8cf;
+  stroke: #0a1318;
+}
+
+/* ---------------- 输入与模板卡 ---------------- */
+.workshop-screen .text-input {
+  border: 1px solid rgba(232, 205, 134, 0.26);
+  background: rgba(10, 19, 24, 0.82);
+  color: #eee3c9;
+}
+
+.workshop-screen .text-input:focus {
+  border-color: rgba(240, 205, 145, 0.62);
+  box-shadow: 0 0 0 2px rgba(201, 162, 39, 0.16);
+  outline: none;
+}
+
+.workshop-screen .text-input::placeholder {
+  color: rgba(214, 200, 172, 0.42);
+}
+
+.workshop-screen .pattern-card {
+  border: 1px solid rgba(232, 205, 134, 0.16);
+  background: rgba(16, 30, 37, 0.7);
+  color: #eee3c9;
+}
+
+.workshop-screen .pattern-card:hover {
+  border-color: rgba(232, 205, 134, 0.5);
+  background: rgba(31, 49, 58, 0.86);
+}
+
+.workshop-screen .pattern-card.active {
+  border-color: rgba(240, 205, 145, 0.62);
+  background: linear-gradient(140deg, rgba(180, 69, 47, 0.34), rgba(142, 51, 35, 0.24));
+  box-shadow: 0 0 16px rgba(180, 69, 47, 0.24);
+}
+
+.workshop-screen .pattern-name {
+  color: #f4e9d2;
+}
+
+.workshop-screen .pattern-desc {
+  color: rgba(226, 216, 194, 0.6);
+}
+
+.workshop-screen .metric-row .v,
+.workshop-screen .stat-row .v {
+  color: #f2e3bd;
+}
+
+.workshop-screen .stat-row .k,
+.workshop-screen .metric-row .k,
+.workshop-screen .draw-hint {
+  color: rgba(226, 216, 194, 0.66);
+}
+
+.workshop-screen input[type='checkbox'] {
+  accent-color: var(--gold);
+}
+
+/* ---------------- 滑杆：金轨与金钮 ---------------- */
+.workshop-screen input[type='range']::-webkit-slider-runnable-track {
+  height: 4px;
+  border: 1px solid rgba(232, 205, 134, 0.18);
+  background: linear-gradient(90deg, rgba(232, 205, 134, 0.5) 0%, rgba(232, 205, 134, 0.1) 100%);
+}
+
+.workshop-screen input[type='range']::-webkit-slider-thumb {
+  width: 14px;
+  height: 14px;
+  margin-top: -6px;
+  border: 1px solid rgba(255, 240, 200, 0.62);
+  border-radius: 50%;
+  background: radial-gradient(circle at 32% 30%, #fff3cf, #d9b34c 58%, #a97f1f);
+  box-shadow:
+    0 0 12px rgba(232, 205, 134, 0.55),
+    0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+/* 夜间滑杆是圆钮，悬停不再转 45° */
+.workshop-screen input[type='range']:hover::-webkit-slider-thumb {
+  transform: scale(1.12);
+}
+
+.workshop-screen input[type='range']::-moz-range-track {
+  border: 1px solid rgba(232, 205, 134, 0.18);
+  background: linear-gradient(90deg, rgba(232, 205, 134, 0.5) 0%, rgba(232, 205, 134, 0.1) 100%);
+}
+
+.workshop-screen input[type='range']::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border: 1px solid rgba(255, 240, 200, 0.62);
+  border-radius: 50%;
+  background: radial-gradient(circle at 32% 30%, #fff3cf, #d9b34c 58%, #a97f1f);
+  box-shadow: 0 0 12px rgba(232, 205, 134, 0.55);
+}
+
+.workshop-screen .slider-row > label {
+  color: rgba(226, 216, 194, 0.62);
+}
+
+.workshop-screen .slider-value {
+  color: #f2e3bd;
+}
+
+/* ---------------- 按钮 ---------------- */
+.workshop-screen .btn {
+  border-color: rgba(232, 205, 134, 0.24);
+  background: rgba(15, 27, 33, 0.72);
+  color: #eadfc6;
+}
+
+.workshop-screen .btn:hover:not(:disabled) {
+  border-color: var(--gold-bright);
+  background: rgba(31, 49, 58, 0.92);
+  color: #fff6e2;
+  box-shadow:
+    0 8px 22px rgba(0, 0, 0, 0.34),
+    0 0 18px rgba(201, 162, 39, 0.18);
+}
+
+.workshop-screen .btn:hover:not(:disabled)::after {
+  border-color: rgba(232, 205, 134, 0.26);
+}
+
+.workshop-screen .btn-primary {
+  overflow: hidden;
+  border-color: rgba(240, 205, 145, 0.55);
+  background: linear-gradient(135deg, #9b3b28, #7d2c1d);
+  color: #fff2dd;
+}
+
+/* 朱砂主按钮上滑过的一道鎏金 */
+.workshop-screen .btn-primary::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    110deg,
+    transparent 18%,
+    rgba(255, 231, 174, 0.26) 44%,
+    rgba(255, 248, 220, 0.48) 50%,
+    rgba(255, 231, 174, 0.26) 56%,
+    transparent 82%
+  );
+  transform: translateX(-130%);
+  transition: transform 680ms var(--ease);
+  pointer-events: none;
+}
+
+.workshop-screen .btn-primary:hover:not(:disabled)::before {
+  transform: translateX(130%);
+}
+
+.workshop-screen .btn-primary:hover:not(:disabled) {
+  border-color: #ffe2a8;
+  background: linear-gradient(135deg, #b04731, #8e3323);
+  color: #fff9ec;
+}
+
+.workshop-screen .btn-active {
+  border-color: rgba(240, 205, 145, 0.6) !important;
+  background: linear-gradient(140deg, rgba(180, 69, 47, 0.42), rgba(142, 51, 35, 0.3)) !important;
+  color: #ffe9c4 !important;
+  box-shadow: 0 0 16px rgba(180, 69, 47, 0.3);
+}
+
+.workshop-screen .btn-danger {
+  border-color: rgba(226, 120, 96, 0.4);
+  color: #e2846a;
+}
+
+/* ---------------- 提示条 ---------------- */
+.workshop-screen .notice-bar {
+  background: rgba(14, 25, 31, 0.96);
+  border: 1px solid rgba(232, 205, 134, 0.34);
+  color: #f0e6cf;
+  box-shadow:
+    0 16px 36px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 236, 196, 0.08);
+}
+
+.workshop-screen .notice-bar.notice-warn {
+  border-color: rgba(226, 120, 96, 0.6);
+  background: rgba(46, 24, 20, 0.96);
+  color: #ffd9c6;
+}
+
+.workshop-screen .notice-bar.notice-info {
+  border-color: rgba(232, 205, 134, 0.5);
 }

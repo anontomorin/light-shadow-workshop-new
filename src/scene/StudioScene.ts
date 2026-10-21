@@ -18,9 +18,14 @@ import type { ShadowObjectDefinition, Transform3D } from '../gameplay/LevelData'
  */
 
 const COLOR_WALL = '#fdf9f1';
-const COLOR_FLOOR = '#ece3d2';
-const COLOR_FRAME = '#d8cdb8';
-const COLOR_LAMP = '#ffcf7a';
+const COLOR_FLOOR = '#3a2a1f';
+const COLOR_FRAME_WOOD = '#2f2118';
+const COLOR_GOLD = '#c9a227';
+const COLOR_LAMP = '#fff2cf';
+
+/** 画框宽度 / 厚度 */
+const FRAME_W = 0.46;
+const FRAME_D = 0.26;
 
 /**
  * 一个可操作物体在场景中的呈现。
@@ -67,7 +72,7 @@ export class StudioScene {
     const standGeo = new THREE.CylinderGeometry(0.07, 0.09, 1, 12);
     this.lampStand = new THREE.Mesh(
       standGeo,
-      new THREE.MeshStandardMaterial({ color: '#9aa3ad', roughness: 0.6, metalness: 0.2 }),
+      new THREE.MeshStandardMaterial({ color: '#6e5c46', roughness: 0.45, metalness: 0.55 }),
     );
     this.disposables.push(standGeo, this.lampStand.material as THREE.Material);
 
@@ -82,9 +87,9 @@ export class StudioScene {
     const shade = new THREE.Mesh(
       shadeGeo,
       new THREE.MeshStandardMaterial({
-        color: '#f6e0b5',
-        roughness: 0.5,
-        metalness: 0.1,
+        color: '#d9b56e',
+        roughness: 0.36,
+        metalness: 0.45,
         side: THREE.DoubleSide,
       }),
     );
@@ -98,7 +103,7 @@ export class StudioScene {
     this.lampGroup.add(this.lampStand, this.lampBulb);
 
     this.outlineMaterial = new THREE.LineBasicMaterial({
-      color: '#1f7f96',
+      color: '#e8cd86',
       transparent: true,
       opacity: 0.95,
     });
@@ -109,27 +114,110 @@ export class StudioScene {
 
   private buildWall(): void {
     const wallGeo = new THREE.PlaneGeometry(WALL_WIDTH, WALL_HEIGHT);
-    const wallMat = new THREE.MeshStandardMaterial({
-      color: COLOR_WALL,
-      roughness: 0.95,
-      metalness: 0,
-    });
+    // 墙面是"投影幕布"：用不受光材质保证整面亮度绝对均匀，
+    // 否则灯光造成的空间渐变会渗进影子颜色，出现肉眼可见的接缝色阶。
+    const wallMat = new THREE.MeshBasicMaterial({ color: COLOR_WALL });
     const wall = new THREE.Mesh(wallGeo, wallMat);
     wall.position.set((WALL_MIN_X + WALL_MAX_X) / 2, (WALL_MIN_Y + WALL_MAX_Y) / 2, WALL_Z);
     this.root.add(wall);
     this.disposables.push(wallGeo, wallMat);
 
-    // 墙面边框（细线框，增强"画布"感）
-    const frameGeo = new THREE.BufferGeometry().setFromPoints([
-      new THREE.Vector3(WALL_MIN_X, WALL_MIN_Y, WALL_Z + 0.01),
-      new THREE.Vector3(WALL_MAX_X, WALL_MIN_Y, WALL_Z + 0.01),
-      new THREE.Vector3(WALL_MAX_X, WALL_MAX_Y, WALL_Z + 0.01),
-      new THREE.Vector3(WALL_MIN_X, WALL_MAX_Y, WALL_Z + 0.01),
-      new THREE.Vector3(WALL_MIN_X, WALL_MIN_Y, WALL_Z + 0.01),
-    ]);
-    const frameMat = new THREE.LineBasicMaterial({ color: COLOR_FRAME });
-    this.root.add(new THREE.Line(frameGeo, frameMat));
-    this.disposables.push(frameGeo, frameMat);
+    this.buildRoomBackdrop();
+
+    // 深木画框：四条框料把明亮的墙面"装裱"起来
+    const woodMat = new THREE.MeshStandardMaterial({
+      color: COLOR_FRAME_WOOD,
+      roughness: 0.62,
+      metalness: 0.12,
+    });
+    this.disposables.push(woodMat);
+
+    const bar = (
+      w: number,
+      h: number,
+      d: number,
+      x: number,
+      y: number,
+      z: number,
+      mat: THREE.Material,
+    ) => {
+      const geo = new THREE.BoxGeometry(w, h, d);
+      const mesh = new THREE.Mesh(geo, mat);
+      mesh.position.set(x, y, z);
+      this.root.add(mesh);
+      this.disposables.push(geo);
+    };
+
+    const frameZ = WALL_Z + FRAME_D / 2;
+    // 上下两条横档
+    bar(
+      WALL_WIDTH + FRAME_W * 2,
+      FRAME_W,
+      FRAME_D,
+      0,
+      WALL_MAX_Y + FRAME_W / 2,
+      frameZ,
+      woodMat,
+    );
+    bar(
+      WALL_WIDTH + FRAME_W * 2,
+      FRAME_W,
+      FRAME_D,
+      0,
+      WALL_MIN_Y - FRAME_W / 2,
+      frameZ,
+      woodMat,
+    );
+    // 左右两条立档
+    bar(
+      FRAME_W,
+      WALL_HEIGHT,
+      FRAME_D,
+      WALL_MIN_X - FRAME_W / 2,
+      5.5,
+      frameZ,
+      woodMat,
+    );
+    bar(
+      FRAME_W,
+      WALL_HEIGHT,
+      FRAME_D,
+      WALL_MAX_X + FRAME_W / 2,
+      5.5,
+      frameZ,
+      woodMat,
+    );
+
+    // 鎏金内线
+    const goldMat = new THREE.MeshStandardMaterial({
+      color: COLOR_GOLD,
+      roughness: 0.3,
+      metalness: 0.85,
+      emissive: new THREE.Color('#3a2a08'),
+      emissiveIntensity: 0.5,
+    });
+    this.disposables.push(goldMat);
+    const trimZ = WALL_Z + FRAME_D + 0.02;
+    bar(WALL_WIDTH, 0.05, 0.02, 0, WALL_MAX_Y + 0.025, trimZ, goldMat);
+    bar(WALL_WIDTH, 0.05, 0.02, 0, WALL_MIN_Y - 0.025, trimZ, goldMat);
+    bar(0.05, WALL_HEIGHT, 0.02, WALL_MIN_X - 0.025, 5.5, trimZ, goldMat);
+    bar(0.05, WALL_HEIGHT, 0.02, WALL_MAX_X + 0.025, 5.5, trimZ, goldMat);
+
+    // 四角金饰
+    for (const sx of [-1, 1]) {
+      for (const sy of [-1, 1]) {
+        const geo = new THREE.BoxGeometry(0.3, 0.3, 0.06);
+        const orn = new THREE.Mesh(geo, goldMat);
+        orn.position.set(
+          sx * (WALL_MAX_X + FRAME_W / 2),
+          sy < 0 ? WALL_MIN_Y - FRAME_W / 2 : WALL_MAX_Y + FRAME_W / 2,
+          WALL_Z + FRAME_D + 0.05,
+        );
+        orn.rotation.z = Math.PI / 4;
+        this.root.add(orn);
+        this.disposables.push(geo);
+      }
+    }
 
     // 墙面刻度网格（浅色，帮助玩家判断位置）
     const gridPts: THREE.Vector3[] = [];
@@ -151,28 +239,100 @@ export class StudioScene {
     this.disposables.push(gridGeo, gridMat);
   }
 
+  /**
+   * 影壁（深漆背板）：把明亮的投影墙"嵌"进一面暗色漆墙里。
+   *
+   * 除了氛围，它还有一个工程作用：明亮的墙面与深色背景之间的锯齿过渡像素
+   * 会污染墙面颜色采样；换成暖色暗漆背板后，过渡色始终是"暖"的（蓝通道低于红通道），
+   * 与影子（#31455a，蓝通道高于红通道）在色相上彻底分开。
+   */
+  private buildRoomBackdrop(): void {
+    const w = 64;
+    const h = 30;
+    const geo = new THREE.PlaneGeometry(w, h);
+    // 顶亮底暗的微弱渐变，模拟高处油灯洒下来的余晖
+    const top = new THREE.Color('#241a10');
+    const bottom = new THREE.Color('#0a0705');
+    const colors = new Float32Array([
+      top.r, top.g, top.b,
+      top.r, top.g, top.b,
+      bottom.r, bottom.g, bottom.b,
+      bottom.r, bottom.g, bottom.b,
+    ]);
+    geo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+    const mat = new THREE.MeshBasicMaterial({ vertexColors: true });
+    const backdrop = new THREE.Mesh(geo, mat);
+    backdrop.position.set(0, h / 2 - 2, WALL_Z - 0.55);
+    this.root.add(backdrop);
+    this.disposables.push(geo, mat);
+
+    // 画框背后的鎏金余晖：只在墙面之外露出一圈暖光
+    const haloSize = 64;
+    const haloCanvas = document.createElement('canvas');
+    haloCanvas.width = haloCanvas.height = haloSize;
+    const ctx = haloCanvas.getContext('2d');
+    if (ctx) {
+      const g = ctx.createRadialGradient(32, 32, 8, 32, 32, 32);
+      g.addColorStop(0, 'rgba(214, 176, 96, 0.30)');
+      g.addColorStop(0.45, 'rgba(196, 152, 64, 0.10)');
+      g.addColorStop(1, 'rgba(196, 152, 64, 0)');
+      ctx.fillStyle = g;
+      ctx.fillRect(0, 0, haloSize, haloSize);
+    }
+    const haloTex = new THREE.CanvasTexture(haloCanvas);
+    haloTex.colorSpace = THREE.SRGBColorSpace;
+    const haloGeo = new THREE.PlaneGeometry(34, 21);
+    const haloMat = new THREE.MeshBasicMaterial({
+      map: haloTex,
+      transparent: true,
+      depthWrite: false,
+    });
+    const halo = new THREE.Mesh(haloGeo, haloMat);
+    halo.position.set(0, 5.5, WALL_Z - 0.5);
+    this.root.add(halo);
+    this.disposables.push(haloTex, haloGeo, haloMat);
+  }
+
   private buildFloor(): void {
     const floorGeo = new THREE.PlaneGeometry(46, 40);
     const floorMat = new THREE.MeshStandardMaterial({
       color: COLOR_FLOOR,
-      roughness: 0.92,
-      metalness: 0,
+      roughness: 0.86,
+      metalness: 0.04,
     });
     const floor = new THREE.Mesh(floorGeo, floorMat);
     floor.rotation.x = -Math.PI / 2;
     floor.position.set(0, 0, 10);
     this.root.add(floor);
     this.disposables.push(floorGeo, floorMat);
+
+    // 地板拼缝：细木纹，让暗色地面不显得是一块空板
+    const seamPts: THREE.Vector3[] = [];
+    for (let x = -22; x <= 22; x += 2.3) {
+      seamPts.push(new THREE.Vector3(x, 0.004, -9), new THREE.Vector3(x, 0.004, 29));
+    }
+    const seamGeo = new THREE.BufferGeometry().setFromPoints(seamPts);
+    const seamMat = new THREE.LineBasicMaterial({
+      color: '#1c140e',
+      transparent: true,
+      opacity: 0.75,
+    });
+    this.root.add(new THREE.LineSegments(seamGeo, seamMat));
+    this.disposables.push(seamGeo, seamMat);
   }
 
   private buildLights(): void {
-    const ambient = new THREE.AmbientLight('#ffffff', 0.55);
-    const hemi = new THREE.HemisphereLight('#fff6e6', '#d9cfbb', 0.55);
-    const dir = new THREE.DirectionalLight('#fff4e2', 0.85);
+    // 墙面保持明亮（影子仍是画面主角），但环境光偏暖、补光偏冷，
+    // 让几何体有"暖前冷后"的体积感。
+    const ambient = new THREE.AmbientLight('#f6ede0', 0.6);
+    const hemi = new THREE.HemisphereLight('#ffeed2', '#26343c', 0.6);
+    const dir = new THREE.DirectionalLight('#ffe9c8', 0.8);
     dir.position.set(6, 16, 12);
-    const fill = new THREE.DirectionalLight('#dfeaf2', 0.35);
+    const fill = new THREE.DirectionalLight('#cfe6f0', 0.38);
     fill.position.set(-10, 6, 8);
-    this.root.add(ambient, hemi, dir, fill);
+    const rim = new THREE.DirectionalLight('#8fc3d4', 0.3);
+    rim.position.set(-8, 7, -10);
+    this.root.add(ambient, hemi, dir, fill, rim);
   }
 
   // ───────────────────────── 物体 ─────────────────────────
@@ -290,6 +450,8 @@ export class StudioScene {
 
   update(dt: number): void {
     this.projection.update(dt);
+    const t = performance.now() * 0.001;
+
     // 选中物体轻微脉动缩放，提供"已选中"的视觉反馈
     for (const e of this.entries) {
       if (e.def.id === this.selectedId) {
@@ -298,8 +460,16 @@ export class StudioScene {
         e.group.scale.setScalar(1);
       }
     }
+
     // 灯光轻微呼吸，营造"影棚"氛围
-    this.lampLight.intensity = 88 + Math.sin(performance.now() * 0.0012) * 6;
+    this.lampLight.intensity = 88 + Math.sin(t * 1.2) * 6;
+
+    // 选中描边呼吸
+    if (this.selectedId) {
+      this.outlineMaterial.opacity = 0.68 + (Math.sin(t * 3.2) * 0.5 + 0.5) * 0.29;
+    } else if (this.outlineMaterial.opacity !== 0.95) {
+      this.outlineMaterial.opacity = 0.95;
+    }
   }
 
   dispose(): void {

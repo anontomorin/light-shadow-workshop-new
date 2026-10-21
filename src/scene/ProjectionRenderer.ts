@@ -294,9 +294,13 @@ export class ProjectionRenderer {
       this.targetStrokeMaterial.opacity = 0.7 + k * 0.3;
       this.targetFillMaterial.opacity = 0.16 + k * 0.3;
       this.shadowMaterial.color.setHex(k > 0.01 ? 0x3f6d84 : COLOR_SHADOW);
-    } else if (this.targetStrokeMaterial.opacity !== 0.7) {
-      this.targetStrokeMaterial.opacity = 0.7;
-      this.targetFillMaterial.opacity = 0.16;
+      return;
+    }
+    // 待贴合的目标轮廓缓慢呼吸，暗示"这里是可以对上的位置"
+    const k = Math.sin(performance.now() * 0.00125) * 0.5 + 0.5;
+    this.targetStrokeMaterial.opacity = 0.66 + k * 0.1;
+    this.targetFillMaterial.opacity = 0.14 + k * 0.035;
+    if (this.shadowMaterial.color.getHex() !== COLOR_SHADOW) {
       this.shadowMaterial.color.setHex(COLOR_SHADOW);
     }
   }

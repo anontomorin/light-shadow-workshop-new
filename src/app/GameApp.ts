@@ -434,8 +434,12 @@ export class GameApp {
     if (name !== 'workshop') this.workshop?.leave();
     this.root.replaceChildren();
     this.root.append(this.modalLayer);
+    // 弹窗层不在 .game-screen 内部，靠这个类决定用"夜色漆画"还是"纸面"样式
+    this.modalLayer.classList.toggle('is-night', name === 'game' || name === 'lab');
     // 左键环绕只在真正可交互的玩法界面开放
     this.sceneManager.setLeftOrbitEnabled(name === 'game' || name === 'lab' || name === 'workshop');
+    // 游戏 / 实验室是暖调夜色工坊（漆墙 + 鎏金）；花窗工坊仍是亮色纸面工作室
+    this.sceneManager.setBackdrop(name === 'workshop' ? '#f6efe3' : '#0b0806');
     if (name === 'title') {
       this.interaction.setEnabled(false);
       this.root.append(this.titleScreen.root);
@@ -830,6 +834,7 @@ export class GameApp {
     this.clearTimers();
     this.interaction.setEnabled(false);
     this.studio.projection.flash();
+    this.hud.playClearBurst();
     this.sound.success();
 
     const level = this.currentLevel;
